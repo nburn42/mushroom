@@ -336,7 +336,9 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        for epoch in range(5000):
+        previous_test_loss_output, previous_test_prediction_output = 999999, 0.0
+        done = False
+        while not done:
             batch = random.sample(train_dataset, 25)
             inputs_batch, labels_batch = zip(*batch)
             loss_output, prediction_output, _ = sess.run([loss, predictions, train], feed_dict={inputs: inputs_batch, labels: labels_batch})
@@ -347,6 +349,16 @@ def main():
             # accuracy = np.mean(labels_batch == prediction_output)
 
             # print("train", "loss", loss_output, "accuracy", accuracy)
+            batch = random.sample(test_dataset, 100)
+            test_inputs_batch, test_labels_batch = zip(*batch)    
+            test_loss_output, test_prediction_output = sess.run([loss, predictions], feed_dict={inputs: test_inputs_batch, labels: test_labels_batch})
+            
+            if  previous_test_loss_output < test_loss_output :
+                done = True
+            
+            previous_test_loss_output, previous_test_prediction_output = test_loss_output, test_prediction_output
+            
+            
 
         # test our trained model with test data
         batch = random.sample(test_dataset, 100)
